@@ -1,3 +1,4 @@
+import './style.css';
 import { SIGNS_DATA } from './signs_data.js';
 import { supabase } from './supabase.js';
 
