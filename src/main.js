@@ -2,14 +2,29 @@ import './style.css';
 import { SIGNS_DATA } from './signs_data.js';
 import { supabase } from './supabase.js';
 
+let isSignUpMode = false;
+
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     initApp();
+    loadSettings();
 });
 
-function checkAuth() {
-    const user = localStorage.getItem('mystic_user');
+async function checkAuth() {
     const modal = document.getElementById('login-modal');
+
+    // Verificar sessão no Supabase se disponível
+    if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user) {
+            if (modal) modal.classList.add('hidden');
+            updateUserUI({ name: session.user.user_metadata?.full_name || session.user.email, email: session.user.email });
+            return;
+        }
+    }
+
+    // Fallback para localStorage
+    const user = localStorage.getItem('mystic_user');
     if (user) {
         const userData = JSON.parse(user);
         if (modal) modal.classList.add('hidden');
@@ -19,33 +34,80 @@ function checkAuth() {
     }
 }
 
-window.handleLogin = async function(event) {
-    event.preventDefault();
-    const name = document.getElementById('login-name').value.trim();
-    const email = document.getElementById('login-email').value.trim();
-    if (!name || !email) return;
+window.toggleAuthMode = function() {
+    isSignUpMode = !isSignUpMode;
+    const title = document.getElementById('auth-modal-title');
+    const subtitle = document.getElementById('auth-modal-subtitle');
+    const nameField = document.getElementById('name-field-container');
+    const submitBtn = document.getElementById('auth-submit-btn');
+    const toggleBtn = document.getElementById('auth-toggle-btn');
 
-    const userData = { name, email };
-    localStorage.setItem('mystic_user', JSON.stringify(userData));
+    if (isSignUpMode) {
+        title.textContent = "Criar Nova Conta SaaS";
+        subtitle.textContent = "Cadastre-se para gerenciar seus e-books e vendas";
+        nameField.classList.remove('hidden');
+        submitBtn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i> Cadastrar Conta';
+        toggleBtn.textContent = "Já tem uma conta? Entrar";
+    } else {
+        title.textContent = "Acesse sua Conta SaaS";
+        subtitle.textContent = "Gerencie seus e-books e vendas na plataforma";
+        nameField.classList.add('hidden');
+        submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar';
+        toggleBtn.textContent = "Não tem conta? Criar agora";
+    }
+}
+
+window.handleAuthSubmit = async function(event) {
+    event.preventDefault();
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value.trim();
+    const name = document.getElementById('auth-name').value.trim() || email.split('@')[0];
 
     if (supabase) {
         try {
-            await supabase.from('profiles').upsert({ email, full_name: name, updated_at: new Date() });
-        } catch (e) {
-            console.log('Supabase sync warning:', e);
+            if (isSignUpMode) {
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { full_name: name } }
+                });
+                if (error) throw error;
+                alert('Conta criada com sucesso! Faça login para continuar.');
+                toggleAuthMode();
+                return;
+            } else {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                const userData = { name: data.user.user_metadata?.full_name || email, email };
+                localStorage.setItem('mystic_user', JSON.stringify(userData));
+                document.getElementById('login-modal').classList.add('hidden');
+                updateUserUI(userData);
+                return;
+            }
+        } catch (err) {
+            alert('Erro na autenticação Supabase: ' + err.message + '\n(Entrando no modo local simulado)');
         }
     }
 
+    // Modo local / fallback
+    const userData = { name, email };
+    localStorage.setItem('mystic_user', JSON.stringify(userData));
     document.getElementById('login-modal').classList.add('hidden');
     updateUserUI(userData);
 }
 
 window.fillDefaultUser = function() {
-    document.getElementById('login-name').value = 'Claudir Israel';
-    document.getElementById('login-email').value = 'claudirisrael@gmail.com';
+    document.getElementById('auth-email').value = 'claudirisrael@gmail.com';
+    document.getElementById('auth-password').value = '12345678';
+    if (isSignUpMode) {
+        document.getElementById('auth-name').value = 'Claudir Israel';
+    }
 }
 
-window.logoutUser = function() {
+window.logoutUser = async function() {
+    if (supabase) {
+        await supabase.auth.signOut();
+    }
     localStorage.removeItem('mystic_user');
     document.getElementById('login-modal').classList.remove('hidden');
 }
@@ -91,13 +153,33 @@ window.toggleMobileMenu = function() {
     menu.classList.toggle('hidden');
 }
 
-function getPurchases() {
-    let purchases = JSON.parse(localStorage.getItem('mystic_purchases') || '[]');
-    if (purchases.length === 0) {
-        purchases = ['aries', 'escorpiao'];
-        localStorage.setItem('mystic_purchases', JSON.stringify(purchases));
+// SaaS Settings Management
+window.saveSaasSettings = function(event) {
+    event.preventDefault();
+    const whatsapp = document.getElementById('setting-whatsapp').value.trim();
+    const price = document.getElementById('setting-price').value.trim();
+    const supasUrl = document.getElementById('setting-supasurl').value.trim();
+
+    const settings = { whatsapp, price, supasUrl };
+    localStorage.setItem('saas_settings', JSON.stringify(settings));
+    alert('Configurações do SaaS salvas com sucesso!');
+}
+
+function loadSettings() {
+    const saved = JSON.parse(localStorage.getItem('saas_settings') || '{}');
+    if (saved.whatsapp) document.getElementById('setting-whatsapp').value = saved.whatsapp;
+    if (saved.price) document.getElementById('setting-price').value = saved.price;
+    if (saved.supasUrl) document.getElementById('setting-supasurl').value = saved.supasUrl;
+
+    // Atualizar preços nos dados se configurado
+    if (saved.price) {
+        Object.values(SIGNS_DATA).forEach(s => s.price = saved.price);
     }
-    return purchases;
+}
+
+// Purchases
+function getPurchases() {
+    return JSON.parse(localStorage.getItem('mystic_purchases') || '[]');
 }
 
 function addPurchase(signId) {
@@ -125,7 +207,7 @@ function renderStoreGrid() {
                             ${sign.symbol}
                         </div>
                         <span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-300 border border-orange-500/30">
-                            ${sign.price}
+                            ${sign.price || 'R$ 37,00'}
                         </span>
                     </div>
                     <h3 class="text-xl font-bold font-heading text-white">E-book ${sign.name}</h3>
@@ -204,11 +286,13 @@ window.openCheckout = function(signId) {
 
     document.getElementById('checkout-ebook-icon').textContent = sign.symbol;
     document.getElementById('checkout-ebook-title').textContent = `E-book ${sign.name}: Guia Completo`;
-    document.getElementById('checkout-ebook-price').textContent = sign.price;
+    document.getElementById('checkout-ebook-price').textContent = sign.price || 'R$ 37,00';
 
+    const settings = JSON.parse(localStorage.getItem('saas_settings') || '{}');
+    const waNumber = settings.whatsapp || '5511999999999';
     const user = JSON.parse(localStorage.getItem('mystic_user') || '{}');
-    const msg = encodeURIComponent(`Olá! Gostaria de comprar o E-book do signo de ${sign.name} por ${sign.price}. Meu e-mail é ${user.email || 'não informado'}.`);
-    document.getElementById('whatsapp-checkout-btn').href = `https://wa.me/5511999999999?text=${msg}`;
+    const msg = encodeURIComponent(`Olá! Gostaria de comprar o E-book do signo de ${sign.name} por ${sign.price || 'R$ 37,00'}. Meu e-mail é ${user.email || 'não informado'}.`);
+    document.getElementById('whatsapp-checkout-btn').href = `https://wa.me/${waNumber}?text=${msg}`;
 
     document.getElementById('checkout-modal').classList.remove('hidden');
 }

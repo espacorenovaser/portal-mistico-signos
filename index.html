@@ -3,43 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zodíaco & Alma — Loja Oficial de E-books Astrológicos</title>
+    <title>Zodíaco & Alma — SaaS de E-books Astrológicos</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Tailwind CSS via Vite / Style -->
+    <!-- Tailwind CSS / Style -->
     <link rel="stylesheet" href="/src/style.css">
 </head>
 <body class="min-h-screen bg-mystic-950 text-slate-100 flex flex-col selection:bg-orange-500 selection:text-white">
 
-    <!-- Login Modal -->
+    <!-- Auth Modal (Sign In / Sign Up) -->
     <div id="login-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-lg flex items-center justify-center p-4">
         <div class="glass-card rounded-3xl max-w-md w-full p-8 border border-orange-500/30 shadow-2xl space-y-6 text-center">
             <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-orange-500 to-purple-600 flex items-center justify-center text-white text-3xl mx-auto shadow-lg shadow-orange-500/30">
-                <i class="fa-solid fa-book-bookmark"></i>
+                <i class="fa-solid fa-crown"></i>
             </div>
             <div>
-                <h2 class="text-2xl font-bold font-heading text-white">Área do Cliente & Loja</h2>
-                <p class="text-slate-400 text-xs mt-1">Conectado via Supabase (Variáveis de Ambiente Vercel)</p>
+                <h2 id="auth-modal-title" class="text-2xl font-bold font-heading text-white">Acesse sua Conta SaaS</h2>
+                <p id="auth-modal-subtitle" class="text-slate-400 text-xs mt-1">Gerencie seus e-books e vendas na plataforma</p>
             </div>
 
-            <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Seu Nome</label>
-                    <input type="text" id="login-name" required placeholder="Ex: Claudir Israel" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm">
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4 text-left">
+                <div id="name-field-container" class="hidden">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Nome Completo</label>
+                    <input type="text" id="auth-name" placeholder="Ex: Claudir Israel" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">E-mail</label>
-                    <input type="email" id="login-email" required placeholder="seu@email.com" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm">
+                    <input type="email" id="auth-email" required placeholder="seu@email.com" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm">
                 </div>
-                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg shadow-orange-500/25 text-sm">
-                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar na Conta
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Senha</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg shadow-orange-500/25 text-sm">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar
                 </button>
             </form>
-            <button onclick="fillDefaultUser()" class="text-xs text-orange-400 hover:underline">Preencher com dados padrão (Claudir)</button>
+
+            <div class="flex items-center justify-between text-xs pt-2 border-t border-white/10">
+                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-orange-400 hover:underline">Não tem conta? Criar agora</button>
+                <button onclick="fillDefaultUser()" class="text-slate-400 hover:text-white">Preencher Demo</button>
+            </div>
         </div>
     </div>
 
@@ -92,18 +100,18 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('store')">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-500 to-purple-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
-                    <i class="fa-solid fa-book-open text-white text-base"></i>
+                    <i class="fa-solid fa-crown text-white text-base"></i>
                 </div>
                 <div>
                     <h1 class="text-lg font-bold font-heading tracking-tight text-white">Zodíaco & Alma</h1>
-                    <p class="text-[11px] text-orange-400 font-semibold uppercase tracking-wider">Loja Oficial de E-books</p>
+                    <p class="text-[11px] text-orange-400 font-semibold uppercase tracking-wider">SaaS de E-books</p>
                 </div>
             </div>
 
             <!-- Desktop Nav -->
             <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
                 <button onclick="switchTab('store')" id="nav-store" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 text-orange-400 bg-white/5">
-                    <i class="fa-solid fa-store mr-2"></i> Vitrine de E-books
+                    <i class="fa-solid fa-store mr-2"></i> Vitrine de Vendas
                 </button>
                 <button onclick="switchTab('library')" id="nav-library" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 text-slate-300 hover:text-white hover:bg-white/5">
                     <i class="fa-solid fa-bookmark mr-2"></i> Minha Biblioteca
@@ -112,7 +120,10 @@
                     <i class="fa-solid fa-heart-pulse mr-2"></i> Compatibilidade
                 </button>
                 <button onclick="switchTab('oracle')" id="nav-oracle" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 text-slate-300 hover:text-white hover:bg-white/5">
-                    <i class="fa-solid fa-sparkles mr-2"></i> Oráculo Diário
+                    <i class="fa-solid fa-sparkles mr-2"></i> Oráculo
+                </button>
+                <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-gear mr-2"></i> Configurações
                 </button>
             </nav>
 
@@ -133,63 +144,94 @@
 
         <!-- Mobile Nav Menu -->
         <div id="mobile-menu" class="hidden md:hidden glass-card border-t border-white/10 px-4 pt-2 pb-4 space-y-2">
-            <button onclick="switchTab('store'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-store mr-2"></i> Vitrine de E-books</button>
+            <button onclick="switchTab('store'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-store mr-2"></i> Vitrine de Vendas</button>
             <button onclick="switchTab('library'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-bookmark mr-2"></i> Minha Biblioteca</button>
             <button onclick="switchTab('compatibility'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-heart-pulse mr-2"></i> Compatibilidade</button>
-            <button onclick="switchTab('oracle'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-sparkles mr-2"></i> Oráculo Diário</button>
+            <button onclick="switchTab('oracle'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-sparkles mr-2"></i> Oráculo</button>
+            <button onclick="switchTab('settings'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-gear mr-2"></i> Configurações</button>
         </div>
     </header>
 
     <!-- Main Container -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- ================= TAB: STORE (VITRINE DE E-BOOKS) ================= -->
+        <!-- ================= TAB: STORE ================= -->
         <section id="tab-store" class="tab-content space-y-10">
-            <!-- Hero Banner -->
             <div class="relative rounded-3xl overflow-hidden glass-card p-8 sm:p-12 lg:p-16 text-center border border-orange-500/20 shadow-2xl">
                 <div class="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-orange-900/10 to-mystic-900/40 pointer-events-none"></div>
                 <div class="relative z-10 max-w-3xl mx-auto space-y-6">
                     <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-orange-500/10 text-orange-400 border border-orange-500/30">
-                        <i class="fa-solid fa-star mr-2"></i> E-books Individuais de Autoconhecimento
+                        <i class="fa-solid fa-crown mr-2"></i> Plataforma SaaS de E-books
                     </span>
                     <h2 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-heading text-white tracking-tight leading-tight">
-                        Adquira o E-book do seu <span class="bg-gradient-to-r from-orange-300 via-orange-500 to-purple-400 bg-clip-text text-transparent">Signo</span>
+                        Seu Negócio de E-books <span class="bg-gradient-to-r from-orange-300 via-orange-500 to-purple-400 bg-clip-text text-transparent">Automatizado</span>
                     </h2>
                     <p class="text-slate-300 text-base sm:text-lg leading-relaxed font-normal">
-                        Cada e-book é um guia digital completo e interativo para desvendar a personalidade, o amor, a carreira e o autocuidado. Compre avulso por apenas <strong class="text-orange-400">R$ 37,00</strong>.
+                        Venda guias astrológicos individuais para seus clientes. Cada e-book possui leitura interativa exclusiva liberada automaticamente após a confirmação de pagamento.
                     </p>
                     <div class="flex flex-wrap justify-center gap-4 pt-2">
                         <button onclick="switchTab('library')" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg shadow-orange-500/25 flex items-center">
-                            <i class="fa-solid fa-bookmark mr-2"></i> Acessar Meus E-books Adquiridos
+                            <i class="fa-solid fa-bookmark mr-2"></i> Ver Minha Biblioteca
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Store Grid (All E-books) -->
             <div class="space-y-6">
                 <div class="flex justify-between items-end">
                     <div>
-                        <h3 class="text-2xl font-bold font-heading text-white">Catálogo de E-books Astrológicos</h3>
-                        <p class="text-slate-400 text-sm mt-1">Escolha o seu signo e tenha acesso imediato ao guia interativo completo</p>
+                        <h3 class="text-2xl font-bold font-heading text-white">Catálogo de Vendas</h3>
+                        <p class="text-slate-400 text-sm mt-1">Adquira guias individuais e desbloqueie a experiência interativa</p>
                     </div>
                 </div>
 
-                <div id="store-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Populated via JS -->
-                </div>
+                <div id="store-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
         </section>
 
-        <!-- ================= TAB: LIBRARY (MINHA BIBLIOTECA) ================= -->
+        <!-- ================= TAB: LIBRARY ================= -->
         <section id="tab-library" class="tab-content hidden space-y-8">
             <div class="text-center max-w-2xl mx-auto space-y-3">
-                <h2 class="text-3xl sm:text-4xl font-bold font-heading text-white">Minha Biblioteca de E-books</h2>
-                <p class="text-slate-300 text-sm">Aqui estão os guias interativos que você adquiriu. Clique em "Ler E-book" para abrir a experiência completa.</p>
+                <h2 class="text-3xl sm:text-4xl font-bold font-heading text-white">Minha Biblioteca</h2>
+                <p class="text-slate-300 text-sm">Seus e-books comprados e liberados para leitura interativa.</p>
             </div>
 
-            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Populated via JS -->
+            <div id="library-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- ================= TAB: SETTINGS (CONFIGURAÇÕES DO SAAS) ================= -->
+        <section id="tab-settings" class="tab-content hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-3">
+                <h2 class="text-3xl sm:text-4xl font-bold font-heading text-white">Configurações do SaaS</h2>
+                <p class="text-slate-300 text-sm">Personalize os parâmetros da sua plataforma de vendas e sua conta.</p>
+            </div>
+
+            <div class="glass-card rounded-3xl p-8 max-w-2xl mx-auto border border-white/10 shadow-xl space-y-6">
+                <h3 class="text-lg font-bold font-heading text-orange-300 flex items-center">
+                    <i class="fa-solid fa-sliders mr-2"></i> Parâmetros da Loja & Checkout
+                </h3>
+
+                <form onsubmit="saveSaasSettings(event)" class="space-y-4 text-sm">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Número do WhatsApp para Vendas</label>
+                        <input type="text" id="setting-whatsapp" placeholder="Ex: 5511999999999" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white focus:outline-none focus:border-orange-500">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Clientes serão direcionados para este número ao clicar em comprar via WhatsApp.</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Preço Padrão dos E-books</label>
+                        <input type="text" id="setting-price" value="R$ 37,00" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white focus:outline-none focus:border-orange-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Chave Supabase URL</label>
+                        <input type="text" id="setting-supasurl" placeholder="https://seu-projeto.supabase.co" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white focus:outline-none focus:border-orange-500">
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-md">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i> Salvar Configurações
+                    </button>
+                </form>
             </div>
         </section>
 
@@ -197,34 +239,27 @@
         <section id="tab-compatibility" class="tab-content hidden space-y-8">
             <div class="text-center max-w-2xl mx-auto space-y-3">
                 <h2 class="text-3xl sm:text-4xl font-bold font-heading text-white">Calculadora de Compatibilidade</h2>
-                <p class="text-slate-300 text-sm">Descubra a sinastria entre dois signos e entenda as dinâmicas no amor, na amizade e na comunicação.</p>
+                <p class="text-slate-300 text-sm">Descubra a sinastria entre dois signos.</p>
             </div>
 
             <div class="glass-card rounded-3xl p-6 sm:p-10 max-w-3xl mx-auto border border-white/10 shadow-xl space-y-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <!-- Sign 1 -->
                     <div class="space-y-2">
                         <label class="block text-sm font-semibold text-slate-300">Primeiro Signo</label>
-                        <select id="compat-sign1" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white focus:outline-none focus:border-orange-500">
-                            <!-- Options populated via JS -->
-                        </select>
+                        <select id="compat-sign1" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white focus:outline-none focus:border-orange-500"></select>
                     </div>
-                    <!-- Sign 2 -->
                     <div class="space-y-2">
                         <label class="block text-sm font-semibold text-slate-300">Segundo Signo</label>
-                        <select id="compat-sign2" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white focus:outline-none focus:border-orange-500">
-                            <!-- Options populated via JS -->
-                        </select>
+                        <select id="compat-sign2" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white focus:outline-none focus:border-orange-500"></select>
                     </div>
                 </div>
 
                 <div class="text-center">
-                    <button onclick="calculateCompatibility()" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg shadow-orange-500/25">
+                    <button onclick="calculateCompatibility()" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg">
                         <i class="fa-solid fa-fire-flame-curved mr-2"></i> Calcular Sinastria
                     </button>
                 </div>
 
-                <!-- Compatibility Result Box -->
                 <div id="compat-result" class="hidden space-y-6 pt-6 border-t border-white/10">
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-mystic-900/80 p-6 rounded-2xl border border-white/10 gap-4">
                         <div class="flex items-center space-x-4">
@@ -249,11 +284,11 @@
 
                     <div class="space-y-4">
                         <div class="glass-card p-5 rounded-2xl space-y-2">
-                            <h5 class="font-bold font-heading text-orange-300 flex items-center"><i class="fa-solid fa-heart mr-2 text-rose-400"></i> No Amor & Relacionamentos</h5>
+                            <h5 class="font-bold font-heading text-orange-300 flex items-center"><i class="fa-solid fa-heart mr-2 text-rose-400"></i> No Amor</h5>
                             <p id="compat-love-text" class="text-slate-300 text-sm leading-relaxed"></p>
                         </div>
                         <div class="glass-card p-5 rounded-2xl space-y-2">
-                            <h5 class="font-bold font-heading text-orange-300 flex items-center"><i class="fa-solid fa-comments mr-2 text-cyan-400"></i> Comunicação & Desafios</h5>
+                            <h5 class="font-bold font-heading text-orange-300 flex items-center"><i class="fa-solid fa-comments mr-2 text-cyan-400"></i> Comunicação</h5>
                             <p id="compat-comm-text" class="text-slate-300 text-sm leading-relaxed"></p>
                         </div>
                     </div>
@@ -265,7 +300,7 @@
         <section id="tab-oracle" class="tab-content hidden space-y-8">
             <div class="text-center max-w-2xl mx-auto space-y-3">
                 <h2 class="text-3xl sm:text-4xl font-bold font-heading text-white">Oráculo & Mensagem do Dia</h2>
-                <p class="text-slate-300 text-sm">Conecte-se com a energia do cosmos. Escolha uma carta mística para receber sua orientação do dia.</p>
+                <p class="text-slate-300 text-sm">Conecte-se com a energia do cosmos.</p>
             </div>
 
             <div class="max-w-xl mx-auto text-center space-y-6">
@@ -275,15 +310,12 @@
                             <i class="fa-solid fa-eye"></i>
                         </div>
                         <h3 class="text-2xl font-bold font-heading text-white">Toque para revelar sua carta</h3>
-                        <p class="text-slate-400 text-xs">Uma mensagem de sabedoria cósmica aguarda por você</p>
                     </div>
                     <div id="oracle-back" class="hidden space-y-4">
                         <span id="oracle-category" class="text-xs uppercase tracking-widest text-orange-400 font-bold">Conselho de Luz</span>
                         <h3 id="oracle-title" class="text-2xl font-bold font-heading text-white">Renovação</h3>
-                        <p id="oracle-message" class="text-slate-200 text-sm sm:text-base leading-relaxed italic">"Deixe ir o que já cumpriu seu ciclo. A energia nova só encontra espaço onde o passado foi agradecido e liberado."</p>
-                        <button onclick="event.stopPropagation(); drawOracleCard();" class="mt-4 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors">
-                            <i class="fa-solid fa-rotate mr-1.5"></i> Sortear Nova Carta
-                        </button>
+                        <p id="oracle-message" class="text-slate-200 text-sm sm:text-base leading-relaxed italic">"Deixe ir o que já cumpriu seu ciclo."</p>
+                        <button onclick="event.stopPropagation(); drawOracleCard();" class="mt-4 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold">Sortear Nova</button>
                     </div>
                 </div>
             </div>
@@ -291,7 +323,7 @@
 
     </main>
 
-    <!-- Sign Detail Modal (Interactive E-book Reader) -->
+    <!-- Sign Detail Modal -->
     <div id="sign-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="glass-card rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-orange-500/30 shadow-2xl relative p-6 sm:p-10 space-y-6">
             <button onclick="closeSignModal()" class="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
@@ -306,7 +338,6 @@
                 </div>
             </div>
 
-            <!-- Modal Content Tabs -->
             <div class="flex border-b border-white/15 space-x-6 text-sm">
                 <button onclick="switchModalTab('overview')" id="mtab-overview" class="modal-tab pb-3 border-b-2 border-orange-400 text-orange-400 font-semibold transition-colors">Visão Geral</button>
                 <button onclick="switchModalTab('love')" id="mtab-love" class="modal-tab pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors">Amor</button>
@@ -314,7 +345,6 @@
                 <button onclick="switchModalTab('wellbeing')" id="mtab-wellbeing" class="modal-tab pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors">Autocuidado</button>
             </div>
 
-            <!-- Modal Tab Panes -->
             <div id="mpane-overview" class="modal-pane space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed"></div>
             <div id="mpane-love" class="modal-pane hidden space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed"></div>
             <div id="mpane-career" class="modal-pane hidden space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed"></div>
@@ -324,7 +354,7 @@
 
     <!-- Footer -->
     <footer class="mt-20 border-t border-white/10 glass-card py-8 text-center text-xs text-slate-400 space-y-2">
-        <p class="font-bold font-heading text-slate-300">Zodíaco & Alma • Loja Oficial de E-books Astrológicos</p>
+        <p class="font-bold font-heading text-slate-300">Zodíaco & Alma • SaaS de E-books Astrológicos</p>
         <p>Todos os direitos reservados.</p>
     </footer>
 
