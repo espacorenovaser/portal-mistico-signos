@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Místico — Zodíaco, Compatibilidade & Afirmações</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        mystic: {
+                            950: '#0a0a0f',
+                            900: '#12121c',
+                            800: '#1c1c2e',
+                            700: '#2a2a40',
+                            600: '#3d3d5c',
+                        },
+                        orange: {
+                            400: '#f6ad55',
+                            500: '#ed8936',
+                            600: '#dd6b20',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0f;
+            color: #f1f5f9;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .glass-card {
+            background: rgba(28, 28, 46, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card:hover {
+            border-color: rgba(237, 137, 54, 0.35);
+            box-shadow: 0 10px 30px -10px rgba(237, 137, 54, 0.15);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a40;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3d3d5c;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-mystic-950 text-slate-100 flex flex-col selection:bg-orange-500 selection:text-white">
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-lg flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl max-w-md w-full p-8 border border-orange-500/30 shadow-2xl space-y-6 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-orange-500 to-purple-600 flex items-center justify-center text-white text-3xl mx-auto shadow-lg shadow-orange-500/30">
+                <i class="fa-solid fa-moon"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold font-heading text-white">Bem-vindo(a) ao Portal</h2>
+                <p class="text-slate-400 text-xs mt-1">Entre com seus dados para acessar sua conta e seus mapas cósmicos</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Seu Nome</label>
+                    <input type="text" id="login-name" required placeholder="Ex: Claudir Israel" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">E-mail</label>
+                    <input type="email" id="login-email" required placeholder="seu@email.com" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm">
+                </div>
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg shadow-orange-500/25 text-sm">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar no Portal
+                </button>
+            </form>
+            <button onclick="fillDefaultUser()" class="text-xs text-orange-400 hover:underline">Preencher com dados padrão (Claudir)</button>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 glass-card border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-500 to-purple-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                    <i class="fa-solid fa-moon text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold font-heading tracking-tight text-white">Zodíaco & Alma</h1>
+                    <p class="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Portal de E-books</p>
+                </div>
+            </div>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 text-orange-400 bg-white/5">
+                    <i class="fa-solid fa-compass mr-2"></i> Início
+                </button>
+                <button onclick="switchTab('signs')" id="nav-signs" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-star mr-2"></i> Os 12 Signos
+                </button>
+                <button onclick="switchTab('compatibility')" id="nav-compatibility" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-heart-pulse mr-2"></i> Compatibilidade
+                </button>
+                <button onclick="switchTab('affirmations')" id="nav-affirmations" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-seedling mr-2"></i> Mapa de Afirmações
+                </button>
+                <button onclick="switchTab('oracle')" id="nav-oracle" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 text-slate-300 hover:text-white hover:bg-white/5">
+                    <i class="fa-solid fa-sparkles mr-2"></i> Oráculo Diário
+                </button>
+            </nav>
+
+            <!-- User Profile & Logout -->
+            <div class="flex items-center space-x-3">
+                <div class="hidden sm:flex items-center space-x-2 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+                    <div class="w-7 h-7 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold text-xs font-heading" id="user-avatar-initial">C</div>
+                    <span class="text-xs font-medium text-slate-200" id="user-display-name">Claudir</span>
+                </div>
+                <button onclick="logoutUser()" title="Sair da conta" class="p-2 rounded-xl bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors">
+                    <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                </button>
+                <button onclick="toggleMobileMenu()" class="md:hidden text-slate-300 hover:text-white p-2">
+                    <i class="fa-solid fa-bars text-xl" id="mobile-menu-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass-card border-t border-white/10 px-4 pt-2 pb-4 space-y-2">
+            <button onclick="switchTab('home'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-compass mr-2"></i> Início</button>
+            <button onclick="switchTab('signs'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-star mr-2"></i> Os 12 Signos</button>
+            <button onclick="switchTab('compatibility'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-heart-pulse mr-2"></i> Compatibilidade</button>
+            <button onclick="switchTab('affirmations'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-seedling mr-2"></i> Mapa de Afirmações</button>
+            <button onclick="switchTab('oracle'); toggleMobileMenu();" class="block w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/5"><i class="fa-solid fa-sparkles mr-2"></i> Oráculo Diário</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ================= TAB: HOME ================= -->
+        <section id="tab-home" class="tab-content space-y-12">
+            <!-- Hero Banner -->
+            <div class="relative rounded-3xl overflow-hidden glass-card p-8 sm:p-12 lg:p-16 text-center border border-orange-500/20 shadow-2xl">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-orange-900/10 to-mystic-900/40 pointer-events-none"></div>
+                <div class="relative z-10 max-w-3xl mx-auto space-y-6">
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Baseado nos E-books Oficiais
+                    </span>
+                    <h2 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-heading text-white tracking-tight leading-tight">
+                        Olá, <span id="hero-user-name" class="text-orange-400">Claudir</span>! Desvende os Segredos do <span class="bg-gradient-to-r from-orange-300 via-orange-500 to-purple-400 bg-clip-text text-transparent">Zodíaco</span>
+                    </h2>
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed font-normal">
+                        Explore guias profundos de autoconhecimento, compatibilidade amorosa e o seu mapa personalizado de afirmações positivas extraídos de nossa biblioteca astrológica exclusiva.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4 pt-4">
+                        <button onclick="switchTab('signs')" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg shadow-orange-500/25 flex items-center">
+                            <i class="fa-solid fa-book-open mr-2"></i> Explorar Signos
+                        </button>
+                        <button onclick="switchTab('compatibility')" class="px-8 py-3.5 rounded-xl glass-card text-white font-semibold hover:bg-white/10 transition-all border border-white/20 flex items-center">
+                            <i class="fa-solid fa-heart mr-2 text-rose-400"></i> Testar Compatibilidade
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Elements Grid -->
+            <div>
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl sm:text-3xl font-bold font-heading text-white">Os Quatro Elementos da Natureza</h3>
+                    <p class="text-slate-400 text-sm mt-2 font-normal">A base energética que molda a personalidade de cada signo</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Fogo -->
+                    <div class="glass-card rounded-2xl p-6 border-t-4 border-orange-500 hover:scale-102 transition-transform duration-300">
+                        <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 text-2xl mb-4">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <h4 class="text-lg font-bold font-heading text-white mb-1">Fogo</h4>
+                        <p class="text-xs text-orange-400 font-semibold mb-3">Áries • Leão • Sagitário</p>
+                        <p class="text-slate-300 text-sm leading-relaxed">Energia impulsiva, paixão intensa, coragem inabalável e liderança natural.</p>
+                    </div>
+                    <!-- Terra -->
+                    <div class="glass-card rounded-2xl p-6 border-t-4 border-emerald-500 hover:scale-102 transition-transform duration-300">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-2xl mb-4">
+                            <i class="fa-solid fa-mountain"></i>
+                        </div>
+                        <h4 class="text-lg font-bold font-heading text-white mb-1">Terra</h4>
+                        <p class="text-xs text-emerald-400 font-semibold mb-3">Touro • Virgem • Capricórnio</p>
+                        <p class="text-slate-300 text-sm leading-relaxed">Estabilidade, praticidade, foco nos resultados e profunda conexão com o mundo físico.</p>
+                    </div>
+                    <!-- Ar -->
+                    <div class="glass-card rounded-2xl p-6 border-t-4 border-cyan-500 hover:scale-102 transition-transform duration-300">
+                        <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-2xl mb-4">
+                            <i class="fa-solid fa-wind"></i>
+                        </div>
+                        <h4 class="text-lg font-bold font-heading text-white mb-1">Ar</h4>
+                        <p class="text-xs text-cyan-400 font-semibold mb-3">Gêmeos • Libra • Aquário</p>
+                        <p class="text-slate-300 text-sm leading-relaxed">Intelecto aguçado, comunicação fluida, inovação constante e sede de liberdade.</p>
+                    </div>
+                    <!-- Água -->
+                    <div class="glass-card rounded-2xl p-6 border-t-4 border-blue-500 hover:scale-102 transition-transform duration-300">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-2xl mb-4">
+                            <i class="fa-solid fa-water"></i>
+                        </div>
+                        <h4 class="text-lg font-bold font-heading text-white mb-1">Água</h4>
+                        <p class="text-xs text-blue-400 font-semibold mb-3">Câncer • Escorpião • Peixes</p>
+                        <p class="text-slate-300 text-sm leading-relaxed">Sensibilidade profunda, intuição poderosa, empatia e conexões emocionais genuínas.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Sign Selection Carousel / Grid -->
+            <div>
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold font-heading text-white">Navegue pelos Signos</h3>
+                        <p class="text-slate-400 text-sm mt-1">Clique em qualquer signo para abrir o e-book interativo</p>
+                    </div>
+                    <button onclick="switchTab('signs')" class="text-orange-400 hover:text-orange-300 text-sm font-semibold flex items-center">
+                        Ver todos <i class="fa-solid fa-arrow-right ml-1.5"></i>
+                    </button>
+                </div>
+                <div id="home-signs-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB: SIGNS ================= -->
+        <section id="tab-signs" class="tab-content hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-3">
+                <h2 class="text-3xl sm:text-4xl font-bold font-heading text-white">Biblioteca dos Signos</h2>
+                <p class="text-slate-300 text-sm">Selecione um signo para explorar o e-book completo com análises de personalidade, amor, carreira e autocuidado.</p>
+
+                <!-- Search & Filter -->
+                <div class="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
+                    <div class="relative flex-grow max-w-md">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-search"></i>
+                        </span>
+                        <input type="text" id="sign-search" oninput="filterSigns()" placeholder="Buscar por signo ou elemento..." class="w-full pl-11 pr-4 py-3 rounded-xl glass-card text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signs Grid -->
+            <div id="signs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated via JS -->
+            </div>
+        </section>
+
+        <!-- ================= TAB: COMPATIBILITY ================= -->
+        <section id="tab-compatibility" class="tab-content hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-3">
+                <h2 class="text-3xl sm:text-4xl font-bold font-heading text-white">Calculadora de Compatibilidade</h2>
+                <p class="text-slate-300 text-sm">Descubra a sinastria entre dois signos e entenda as dinâmicas no amor, na amizade e na comunicação.</p>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 sm:p-10 max-w-3xl mx-auto border border-white/10 shadow-xl space-y-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- Sign 1 -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-slate-300">Primeiro Signo</label>
+                        <select id="compat-sign1" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white focus:outline-none focus:border-orange-500">
+                            <!-- Options populated via JS -->
+                        </select>
+                    </div>
+                    <!-- Sign 2 -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-slate-300">Segundo Signo</label>
+                        <select id="compat-sign2" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white focus:outline-none focus:border-orange-500">
+                            <!-- Options populated via JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button onclick="calculateCompatibility()" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg shadow-orange-500/25">
+                        <i class="fa-solid fa-fire-flame-curved mr-2"></i> Calcular Sinastria
+                    </button>
+                </div>
+
+                <!-- Compatibility Result Box -->
+                <div id="compat-result" class="hidden space-y-6 pt-6 border-t border-white/10">
+                    <div class="flex flex-col sm:flex-row items-center justify-between bg-mystic-900/80 p-6 rounded-2xl border border-white/10 gap-4">
+                        <div class="flex items-center space-x-4">
+                            <div id="res-sign1-badge" class="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-2xl text-orange-400 font-bold">♈</div>
+                            <div>
+                                <h4 id="res-name1" class="font-bold font-heading text-lg text-white">Áries</h4>
+                                <span id="res-elem1" class="text-xs text-slate-400">Elemento Fogo</span>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-extrabold font-heading text-orange-400" id="compat-score">88%</div>
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Compatibilidade</span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-right">
+                                <h4 id="res-name2" class="font-bold font-heading text-lg text-white">Leão</h4>
+                                <span id="res-elem2" class="text-xs text-slate-400">Elemento Fogo</span>
+                            </div>
+                            <div id="res-sign2-badge" class="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center text-2xl text-orange-400 font-bold">♌</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="glass-card p-5 rounded-2xl space-y-2">
+                            <h5 class="font-bold font-heading text-orange-300 flex items-center"><i class="fa-solid fa-heart mr-2 text-rose-400"></i> No Amor & Relacionamentos</h5>
+                            <p id="compat-love-text" class="text-slate-300 text-sm leading-relaxed"></p>
+                        </div>
+                        <div class="glass-card p-5 rounded-2xl space-y-2">
+                            <h5 class="font-bold font-heading text-orange-300 flex items-center"><i class="fa-solid fa-comments mr-2 text-cyan-400"></i> Comunicação & Desafios</h5>
+                            <p id="compat-comm-text" class="text-slate-300 text-sm leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB: AFFIRMATIONS ================= -->
+        <section id="tab-affirmations" class="tab-content hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-3">
+                <h2 class="text-3xl sm:text-4xl font-bold font-heading text-white">Mapa de Afirmações Positivas</h2>
+                <p class="text-slate-300 text-sm">"Cada palavra que você repete é uma semente de transformação em sua vida." Crie seu mapa personalizado baseado em seu signo e intenção.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Generator Control Panel -->
+                <div class="glass-card rounded-3xl p-6 space-y-6 border border-white/10 h-fit">
+                    <h3 class="text-lg font-bold font-heading text-orange-300 flex items-center">
+                        <i class="fa-solid fa-sliders mr-2"></i> Configurar Seu Mapa
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">Seu Signo</label>
+                            <select id="affirm-sign" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white text-sm focus:outline-none focus:border-orange-500">
+                                <!-- Populated via JS -->
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">Intenção / Foco</label>
+                            <select id="affirm-focus" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white text-sm focus:outline-none focus:border-orange-500">
+                                <option value="amor">Amor Próprio & Autoaceitação</option>
+                                <option value="prosperidade">Prosperidade & Abundância</option>
+                                <option value="confiança">Confiança & Poder Pessoal</option>
+                                <option value="paz">Paz Interior & Equilíbrio Emocional</option>
+                                <option value="transformacao">Transformação & Renascimento</option>
+                            </select>
+                        </div>
+
+                        <button onclick="generateAffirmation()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-md text-sm">
+                            <i class="fa-solid fa-wand-magic mr-2"></i> Gerar Afirmações
+                        </button>
+                    </div>
+
+                    <div class="border-t border-white/10 pt-4">
+                        <h4 class="text-sm font-bold font-heading text-white mb-3 flex items-center"><i class="fa-solid fa-bookmark text-orange-400 mr-2"></i> Afirmações de <span id="map-owner-name" class="ml-1 text-orange-300">Claudir</span></h4>
+                        <div id="saved-affirmations-list" class="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
+                            <!-- Populated via localStorage -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Display Affirmations Canvas -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="glass-card rounded-3xl p-8 sm:p-12 border border-orange-500/30 relative overflow-hidden flex flex-col justify-between min-h-[380px] shadow-2xl">
+                        <div class="absolute -right-10 -bottom-10 text-9xl text-white/5 font-bold select-none pointer-events-none">✨</div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-6">
+                                <span id="card-sign-tag" class="px-3.5 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-300 border border-orange-500/30">Áries • Fogo</span>
+                                <button onclick="saveCurrentAffirmation()" class="text-slate-400 hover:text-orange-400 transition-colors p-2" title="Salvar Afirmação">
+                                    <i class="fa-regular fa-bookmark text-xl" id="save-icon"></i>
+                                </button>
+                            </div>
+
+                            <blockquote class="text-xl sm:text-2xl font-semibold font-heading text-white leading-relaxed text-center my-8" id="affirmation-display">
+                                "Minha coragem interior desbrava qualquer obstáculo com sabedoria, luz e determinação."
+                            </blockquote>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400 border-t border-white/10 pt-4 gap-3">
+                            <p><i class="fa-solid fa-quote-left mr-1 text-orange-400"></i> Repita diariamente pela manhã ou antes de dormir.</p>
+                            <button onclick="generateAffirmation()" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors">
+                                <i class="fa-solid fa-shuffle mr-1.5"></i> Outra Afirmação
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Guidance Card -->
+                    <div class="glass-card rounded-2xl p-6 border border-white/10 space-y-2">
+                        <h4 class="font-bold font-heading text-orange-300 text-sm flex items-center">
+                            <i class="fa-solid fa-book-bookmark mr-2 text-orange-400"></i> Orientações para o Seu Mapa
+                        </h4>
+                        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                            O e-book de orientações ensina que o mapa deve ser personalizado com suas qualidades naturais. Salve suas afirmações favoritas e visualize-as diariamente para fortalecer sua autoconfiança.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB: ORACLE ================= -->
+        <section id="tab-oracle" class="tab-content hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-3">
+                <h2 class="text-3xl sm:text-4xl font-bold font-heading text-white">Oráculo & Mensagem do Dia</h2>
+                <p class="text-slate-300 text-sm">Conecte-se com a energia do cosmos. Escolha uma carta mística para receber sua orientação do dia.</p>
+            </div>
+
+            <div class="max-w-xl mx-auto text-center space-y-6">
+                <div id="oracle-card-container" class="glass-card rounded-3xl p-8 sm:p-12 border border-orange-500/30 min-h-[320px] flex flex-col items-center justify-center space-y-6 shadow-2xl cursor-pointer hover:border-orange-400 transition-all" onclick="drawOracleCard()">
+                    <div id="oracle-front" class="space-y-4">
+                        <div class="w-20 h-20 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center mx-auto text-3xl text-orange-400 animate-pulse">
+                            <i class="fa-solid fa-eye"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold font-heading text-white">Toque para revelar sua carta</h3>
+                        <p class="text-slate-400 text-xs">Uma mensagem de sabedoria cósmica aguarda por você</p>
+                    </div>
+                    <div id="oracle-back" class="hidden space-y-4">
+                        <span id="oracle-category" class="text-xs uppercase tracking-widest text-orange-400 font-bold">Conselho de Luz</span>
+                        <h3 id="oracle-title" class="text-2xl font-bold font-heading text-white">Renovação</h3>
+                        <p id="oracle-message" class="text-slate-200 text-sm sm:text-base leading-relaxed italic">"Deixe ir o que já cumpriu seu ciclo. A energia nova só encontra espaço onde o passado foi agradecido e liberado."</p>
+                        <button onclick="event.stopPropagation(); drawOracleCard();" class="mt-4 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors">
+                            <i class="fa-solid fa-rotate mr-1.5"></i> Sortear Nova Carta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Sign Detail Modal -->
+    <div id="sign-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div class="glass-card rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-orange-500/30 shadow-2xl relative p-6 sm:p-10 space-y-6">
+            <button onclick="closeSignModal()" class="absolute top-6 right-6 w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="flex items-center space-x-4 border-b border-white/10 pb-6">
+                <div id="modal-sign-symbol" class="w-16 h-16 rounded-2xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-3xl text-orange-300 font-bold">♈</div>
+                <div>
+                    <h3 id="modal-sign-name" class="text-3xl font-bold font-heading text-white">Áries</h3>
+                    <p id="modal-sign-meta" class="text-xs text-orange-400 font-semibold tracking-wider uppercase mt-1">21 de março a 19 de abril • Fogo • Marte</p>
+                </div>
+            </div>
+
+            <!-- Modal Content Tabs -->
+            <div class="flex border-b border-white/15 space-x-6 text-sm">
+                <button onclick="switchModalTab('overview')" id="mtab-overview" class="modal-tab pb-3 border-b-2 border-orange-400 text-orange-400 font-semibold transition-colors">Visão Geral</button>
+                <button onclick="switchModalTab('love')" id="mtab-love" class="modal-tab pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors">Amor</button>
+                <button onclick="switchModalTab('career')" id="mtab-career" class="modal-tab pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors">Carreira</button>
+                <button onclick="switchModalTab('wellbeing')" id="mtab-wellbeing" class="modal-tab pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors">Autocuidado</button>
+            </div>
+
+            <!-- Modal Tab Panes -->
+            <div id="mpane-overview" class="modal-pane space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed"></div>
+            <div id="mpane-love" class="modal-pane hidden space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed"></div>
+            <div id="mpane-career" class="modal-pane hidden space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed"></div>
+            <div id="mpane-wellbeing" class="modal-pane hidden space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-20 border-t border-white/10 glass-card py-8 text-center text-xs text-slate-400 space-y-2">
+        <p class="font-bold font-heading text-slate-300">Portal Místico • Baseado nos E-books Oficiais de Autoconhecimento & Zodíaco</p>
+        <p>Desenvolvido para inspirar sua jornada cósmica.</p>
+    </footer>
+
+    <!-- Include signs data -->
+    <script src="signs_data.js"></script>
+    <!-- App Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
