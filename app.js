@@ -1,4 +1,4 @@
-// Main application logic with User Authentication
+// Main application logic with E-book Store & Library System
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
@@ -42,20 +42,14 @@ function logoutUser() {
 function updateUserUI(user) {
     const displayName = document.getElementById('user-display-name');
     const avatarInitial = document.getElementById('user-avatar-initial');
-    const heroName = document.getElementById('hero-user-name');
-    const mapOwner = document.getElementById('map-owner-name');
-
     if (displayName) displayName.textContent = user.name.split(' ')[0];
     if (avatarInitial) avatarInitial.textContent = user.name.charAt(0).toUpperCase();
-    if (heroName) heroName.textContent = user.name.split(' ')[0];
-    if (mapOwner) mapOwner.textContent = user.name;
 }
 
 function initApp() {
-    renderHomeSigns();
-    renderSignsGrid();
+    renderStoreGrid();
+    renderLibraryGrid();
     populateSelects();
-    loadSavedAffirmations();
 }
 
 // Tab Switching
@@ -70,11 +64,14 @@ function switchTab(tabId) {
     if (targetTab) targetTab.classList.remove('hidden');
 
     document.querySelectorAll('nav button').forEach(btn => {
-        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick'].includes(tabId)) {
             btn.classList.add('text-orange-400', 'bg-white/5');
             btn.classList.remove('text-slate-300');
         }
     });
+
+    if (tabId === 'library') renderLibraryGrid();
+    if (tabId === 'store') renderStoreGrid();
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -84,75 +81,153 @@ function toggleMobileMenu() {
     menu.classList.toggle('hidden');
 }
 
-// Render Home Signs
-function renderHomeSigns() {
-    const container = document.getElementById('home-signs-grid');
+// Get user purchases from localStorage
+function getPurchases() {
+    let purchases = JSON.parse(localStorage.getItem('mystic_purchases') || '[]');
+    if (purchases.length === 0) {
+        // Default unlocked for demo
+        purchases = ['aries', 'escorpiao'];
+        localStorage.setItem('mystic_purchases', JSON.stringify(purchases));
+    }
+    return purchases;
+}
+
+function addPurchase(signId) {
+    let purchases = getPurchases();
+    if (!purchases.includes(signId)) {
+        purchases.push(signId);
+        localStorage.setItem('mystic_purchases', JSON.stringify(purchases));
+    }
+}
+
+// Render Storefront Grid (Vitrine)
+function renderStoreGrid() {
+    const container = document.getElementById('store-grid');
     if (!container || !window.SIGNS_DATA) return;
 
+    const purchases = getPurchases();
     let html = '';
-    const signs = Object.values(window.SIGNS_DATA).slice(0, 6);
-    signs.forEach(sign => {
+
+    Object.values(window.SIGNS_DATA).forEach(sign => {
+        const isOwned = purchases.includes(sign.id);
         html += `
-            <div onclick="openSignModal('${sign.id}')" class="glass-card rounded-2xl p-4 text-center cursor-pointer hover:scale-105 transition-all duration-300 group border border-white/10">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr ${sign.color} flex items-center justify-center text-white text-xl font-bold mx-auto mb-3 shadow-md group-hover:scale-110 transition-transform font-heading">
-                    ${sign.symbol}
+            <div class="glass-card rounded-3xl p-6 border border-white/10 flex flex-col justify-between group hover:border-orange-500/40 transition-all">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr ${sign.color} flex items-center justify-center text-white text-2xl font-bold shadow-lg font-heading">
+                            ${sign.symbol}
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-300 border border-orange-500/30">
+                            ${sign.price || 'R$ 37,00'}
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold font-heading text-white">E-book ${sign.name}</h3>
+                    <p class="text-xs text-orange-400 font-semibold mt-0.5">O ${sign.name} no Zodíaco</p>
+                    <p class="text-slate-300 text-xs mt-3 line-clamp-3 leading-relaxed">${sign.summary}</p>
                 </div>
-                <h4 class="font-bold font-heading text-white text-sm">${sign.name}</h4>
-                <p class="text-[10px] text-slate-400 mt-0.5">${sign.element}</p>
+                <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                    ${isOwned
+                        ? `<span class="text-xs font-bold text-emerald-400 flex items-center"><i class="fa-solid fa-circle-check mr-1.5"></i> Adquirido</span>
+                           <button onclick="openSignModal('${sign.id}')" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-colors">Ler E-book</button>`
+                        : `<span class="text-xs text-slate-400">Guia Digital Completo</span>
+                           <button onclick="openCheckout('${sign.id}')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-xs hover:brightness-110 transition-all shadow-md">Comprar E-book</button>`
+                    }
+                </div>
             </div>
         `;
     });
     container.innerHTML = html;
 }
 
-// Render Signs Grid (All 12)
-function renderSignsGrid(filter = '') {
-    const container = document.getElementById('signs-grid');
+// Render My Library Grid (Minha Biblioteca)
+function renderLibraryGrid() {
+    const container = document.getElementById('library-grid');
     if (!container || !window.SIGNS_DATA) return;
 
+    const purchases = getPurchases();
     let html = '';
+
     Object.values(window.SIGNS_DATA).forEach(sign => {
-        if (filter && !sign.name.toLowerCase().includes(filter.toLowerCase()) && !sign.element.toLowerCase().includes(filter.toLowerCase())) {
-            return;
-        }
+        if (!purchases.includes(sign.id)) return;
+
         html += `
-            <div onclick="openSignModal('${sign.id}')" class="glass-card rounded-3xl p-6 cursor-pointer hover:scale-[1.02] transition-all duration-300 group border border-white/10 flex flex-col justify-between">
+            <div class="glass-card rounded-3xl p-6 border border-emerald-500/30 flex flex-col justify-between group shadow-xl">
                 <div>
                     <div class="flex items-center justify-between mb-4">
                         <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr ${sign.color} flex items-center justify-center text-white text-2xl font-bold shadow-lg font-heading">
                             ${sign.symbol}
                         </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-orange-300 border border-white/10">
-                            ${sign.element}
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                            <i class="fa-solid fa-lock-open mr-1"></i> Liberado
                         </span>
                     </div>
-                    <h3 class="text-xl font-bold font-heading text-white group-hover:text-orange-300 transition-colors">${sign.name}</h3>
-                    <p class="text-xs text-orange-400/90 font-semibold mt-0.5">${sign.dates}</p>
+                    <h3 class="text-xl font-bold font-heading text-white">E-book ${sign.name}</h3>
+                    <p class="text-xs text-orange-400 font-semibold mt-0.5">Leitura & Experiência Interativa</p>
                     <p class="text-slate-300 text-xs mt-3 line-clamp-3 leading-relaxed">${sign.summary}</p>
                 </div>
-                <div class="mt-6 pt-4 border-t border-white/10 flex justify-between items-center text-xs text-slate-400">
-                    <span>Regente: <strong class="text-slate-200">${sign.planet}</strong></span>
-                    <span class="text-orange-400 font-semibold group-hover:translate-x-1 transition-transform flex items-center">Abrir E-book Interativo <i class="fa-solid fa-bolt ml-1.5"></i></span>
+                <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                    <span class="text-xs text-slate-400">Acesso Vitalício</span>
+                    <button onclick="openSignModal('${sign.id}')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-xs hover:brightness-110 transition-all shadow-md flex items-center">
+                        <i class="fa-solid fa-book-open-reader mr-1.5"></i> Abrir E-book Interativo
+                    </button>
                 </div>
             </div>
         `;
     });
-    container.innerHTML = html || '<p class="col-span-full text-center text-slate-400 py-8">Nenhum signo encontrado.</p>';
+
+    if (!html) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-16 space-y-4 glass-card rounded-3xl">
+                <i class="fa-solid fa-book text-4xl text-slate-500"></i>
+                <h3 class="text-xl font-bold font-heading text-white">Sua biblioteca está vazia</h3>
+                <p class="text-slate-400 text-sm">Explore nossa vitrine e adquira seu primeiro e-book astrológico!</p>
+                <button onclick="switchTab('store')" class="px-6 py-3 rounded-xl bg-orange-500 text-white font-bold text-xs">Ir para a Vitrine</button>
+            </div>
+        `;
+    } else {
+        container.innerHTML = html;
+    }
 }
 
-function filterSigns() {
-    const query = document.getElementById('sign-search').value;
-    renderSignsGrid(query);
+// Checkout Modal Logic
+let currentCheckoutSign = null;
+
+function openCheckout(signId) {
+    const sign = window.SIGNS_DATA[signId];
+    if (!sign) return;
+    currentCheckoutSign = sign;
+
+    document.getElementById('checkout-ebook-icon').textContent = sign.symbol;
+    document.getElementById('checkout-ebook-title').textContent = `E-book ${sign.name}: Guia Completo`;
+    document.getElementById('checkout-ebook-price').textContent = sign.price || 'R$ 37,00';
+
+    // WhatsApp Checkout Link
+    const user = JSON.parse(localStorage.getItem('mystic_user') || '{}');
+    const msg = encodeURIComponent(`Olá! Gostaria de comprar o E-book do signo de ${sign.name} por R$ 37,00. Meu e-mail é ${user.email || 'não informado'}.`);
+    document.getElementById('whatsapp-checkout-btn').href = `https://wa.me/5511999999999?text=${msg}`;
+
+    document.getElementById('checkout-modal').classList.remove('hidden');
 }
 
-// Populate Select Dropdowns
+function closeCheckoutModal() {
+    document.getElementById('checkout-modal').classList.add('hidden');
+}
+
+function simulatePurchase(method) {
+    if (!currentCheckoutSign) return;
+    addPurchase(currentCheckoutSign.id);
+    closeCheckoutModal();
+    alert(`Pagamento via ${method.toUpperCase()} aprovado com sucesso! O E-book de ${currentCheckoutSign.name} já foi liberado em sua Minha Biblioteca.`);
+    switchTab('library');
+}
+
+// Populate Select Dropdowns for Compatibility
 function populateSelects() {
     if (!window.SIGNS_DATA) return;
     const signs = Object.values(window.SIGNS_DATA);
 
     const s1 = document.getElementById('compat-sign1');
     const s2 = document.getElementById('compat-sign2');
-    const sAffirm = document.getElementById('affirm-sign');
 
     let options = '';
     signs.forEach(s => {
@@ -164,16 +239,19 @@ function populateSelects() {
         s2.innerHTML = options;
         if (signs.length > 1) s2.selectedIndex = 1;
     }
-    if (sAffirm) sAffirm.innerHTML = options;
 }
 
-// Sign Modal Logic - Interactive E-book Experience
-let currentActiveSign = null;
-
+// Sign Modal Logic - Interactive E-book Reader
 function openSignModal(signId) {
     const sign = window.SIGNS_DATA[signId];
     if (!sign) return;
-    currentActiveSign = sign;
+
+    // Check if user owns it
+    const purchases = getPurchases();
+    if (!purchases.includes(sign.id)) {
+        openCheckout(sign.id);
+        return;
+    }
 
     document.getElementById('modal-sign-symbol').textContent = sign.symbol;
     document.getElementById('modal-sign-name').textContent = sign.name;
@@ -251,12 +329,6 @@ function openSignModal(signId) {
                 <h4 class="font-bold font-heading text-orange-300 text-lg"><i class="fa-solid fa-leaf mr-2 text-emerald-400"></i> Ritual de Autocuidado</h4>
                 <p class="text-slate-200 text-sm sm:text-base leading-relaxed">Para recarregar as energias do elemento ${sign.element}, ${sign.name} precisa de momentos de pausa consciente. Desfrute de um banho relaxante, meditação ou contato com a natureza.</p>
             </div>
-
-            <div class="glass-card p-6 rounded-2xl border border-white/10 text-center space-y-4">
-                <h5 class="font-bold font-heading text-white text-sm">Gerar Afirmação Instantânea para ${sign.name}</h5>
-                <blockquote id="modal-affirmation" class="text-sm font-semibold italic text-orange-300">"Minha energia é sagrada e transborda paz, força e clareza em cada passo."</blockquote>
-                <button onclick="refreshModalAffirmation('${sign.name}')" class="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold">Nova Afirmação</button>
-            </div>
         </div>
     `;
 
@@ -292,15 +364,6 @@ function answerQuiz(isCorrect) {
     } else {
         res.innerHTML = '<span class="text-rose-400 font-semibold"><i class="fa-solid fa-xmark mr-1"></i> Ops! A resposta correta é a alternativa A. Cada signo valoriza sua verdade e liberdade essencial.</span>';
     }
-}
-
-function refreshModalAffirmation(signName) {
-    const affs = [
-        `"Minha luz própria ilumina meu caminho e atrai bênçãos diárias para minha vida."`,
-        `"Sou dono(a) do meu destino, conduzindo minha energia com sabedoria e poder pessoal."`,
-        `"O universo apoia meus passos e sinto profunda paz em meu coração."`
-    ];
-    document.getElementById('modal-affirmation').textContent = affs[Math.floor(Math.random() * affs.length)];
 }
 
 function closeSignModal() {
@@ -366,97 +429,6 @@ function calculateCompatibility() {
     document.getElementById('compat-comm-text').textContent = commText;
 
     document.getElementById('compat-result').classList.remove('hidden');
-}
-
-// Affirmation Generator Logic
-const affirmationsDB = {
-    amor: [
-        "Meu coração é um espaço seguro de amor genuíno, atraindo relações que vibram na mesma frequência de paz e respeito.",
-        "Eu me permito amar e ser amado(a) em minha totalidade, sem medo de mostrar minha essência.",
-        "Cultivo a harmonia em meus afetos ao estabelecer limites claros e transbordar carinho."
-    ],
-    prosperidade: [
-        "A abundância do universo flui livremente em minha vida através dos meus talentos e da minha dedicação.",
-        "Minhas escolhas diárias abrem caminhos para a prosperidade e para o sucesso em todas as áreas.",
-        "Sou merecedor(a) de realizar meus maiores sonhos e construir uma realidade próspera."
-    ],
-    confiança: [
-        "Minha força interior é inabalável e me guia com coragem por qualquer caminho que eu escolha trilhar.",
-        "Confio plenamente na minha intuição e na sabedoria que habita em meu interior.",
-        "Cada desafio superado expande minha autoconfiança e revela meu verdadeiro potencial."
-    ],
-    paz: [
-        "Minha mente é um lago sereno; respiro tranquilidade e exalo serenidade.",
-        "Liberto o controle excessivo e confio no fluxo natural da vida e do tempo divino.",
-        "Encontro refúgio e paz em meu próprio centro a qualquer momento do dia."
-    ],
-    transformacao: [
-        "Acolho as mudanças como portais sagrados para a minha evolução e renovação.",
-        "Deixo ir com gratidão tudo o que já cumpriu seu ciclo em minha jornada.",
-        "Renasci todos os dias mais forte, sábio(a) e alinhado(a) com meu propósito."
-    ]
-};
-
-let currentAffirmationText = "";
-
-function generateAffirmation() {
-    const signId = document.getElementById('affirm-sign').value;
-    const focus = document.getElementById('affirm-focus').value;
-    const sign = window.SIGNS_DATA[signId] || { name: 'Áries', element: 'Fogo', symbol: '♈' };
-
-    const list = affirmationsDB[focus] || affirmationsDB.amor;
-    const randomAffirm = list[Math.floor(Math.random() * list.length)];
-
-    currentAffirmationText = `"${randomAffirm}" — ${sign.name} (${sign.element})`;
-    document.getElementById('affirmation-display').textContent = `"${randomAffirm}"`;
-    document.getElementById('card-sign-tag').textContent = `${sign.name} • ${sign.element}`;
-
-    const icon = document.getElementById('save-icon');
-    icon.classList.remove('fa-solid', 'text-orange-400');
-    icon.classList.add('fa-regular');
-}
-
-function saveCurrentAffirmation() {
-    if (!currentAffirmationText) return;
-    let saved = JSON.parse(localStorage.getItem('saved_affirmations') || '[]');
-    if (!saved.includes(currentAffirmationText)) {
-        saved.push(currentAffirmationText);
-        localStorage.setItem('saved_affirmations', JSON.stringify(saved));
-        loadSavedAffirmations();
-
-        const icon = document.getElementById('save-icon');
-        icon.classList.remove('fa-regular');
-        icon.classList.add('fa-solid', 'text-orange-400');
-    }
-}
-
-function loadSavedAffirmations() {
-    const container = document.getElementById('saved-affirmations-list');
-    if (!container) return;
-
-    const saved = JSON.parse(localStorage.getItem('saved_affirmations') || '[]');
-    if (saved.length === 0) {
-        container.innerHTML = '<p class="text-slate-500 italic">Nenhuma afirmação salva no seu mapa ainda.</p>';
-        return;
-    }
-
-    let html = '';
-    saved.forEach((item, index) => {
-        html += `
-            <div class="flex items-center justify-between bg-mystic-900 p-2.5 rounded-xl border border-white/5 gap-2">
-                <p class="text-slate-300 italic truncate">${item}</p>
-                <button onclick="removeAffirmation(${index})" class="text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash"></i></button>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
-}
-
-function removeAffirmation(index) {
-    let saved = JSON.parse(localStorage.getItem('saved_affirmations') || '[]');
-    saved.splice(index, 1);
-    localStorage.setItem('saved_affirmations', JSON.stringify(saved));
-    loadSavedAffirmations();
 }
 
 // Oracle Card Logic
