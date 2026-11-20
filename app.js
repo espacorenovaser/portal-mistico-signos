@@ -1,4 +1,9 @@
-// Main application logic with E-book Store & Library System
+// Supabase Configuration (Insira suas credenciais reais do Supabase aqui quando desejar conectar à nuvem)
+const SUPABASE_URL = 'https://seu-projeto.supabase.co';
+const SUPABASE_ANON_KEY = 'sua-anon-key';
+const supabase = (window.supabase && SUPABASE_URL !== 'https://seu-projeto.supabase.co')
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
@@ -17,7 +22,7 @@ function checkAuth() {
     }
 }
 
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
     const name = document.getElementById('login-name').value.trim();
     const email = document.getElementById('login-email').value.trim();
@@ -25,6 +30,16 @@ function handleLogin(event) {
 
     const userData = { name, email };
     localStorage.setItem('mystic_user', JSON.stringify(userData));
+
+    // Se o Supabase estiver configurado, podemos salvar/sincronizar na tabela 'profiles'
+    if (supabase) {
+        try {
+            await supabase.from('profiles').upsert({ email, full_name: name, updated_at: new Date() });
+        } catch (e) {
+            console.log('Modo local ativado (Supabase offline)');
+        }
+    }
+
     document.getElementById('login-modal').classList.add('hidden');
     updateUserUI(userData);
 }
@@ -64,7 +79,7 @@ function switchTab(tabId) {
     if (targetTab) targetTab.classList.remove('hidden');
 
     document.querySelectorAll('nav button').forEach(btn => {
-        if (btn.getAttribute('onclick') && btn.getAttribute('onclick'].includes(tabId)) {
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
             btn.classList.add('text-orange-400', 'bg-white/5');
             btn.classList.remove('text-slate-300');
         }
@@ -81,12 +96,11 @@ function toggleMobileMenu() {
     menu.classList.toggle('hidden');
 }
 
-// Get user purchases from localStorage
+// Get user purchases from localStorage / Supabase
 function getPurchases() {
     let purchases = JSON.parse(localStorage.getItem('mystic_purchases') || '[]');
     if (purchases.length === 0) {
-        // Default unlocked for demo
-        purchases = ['aries', 'escorpiao'];
+        purchases = ['aries', 'escorpiao']; // Demo default unlocked
         localStorage.setItem('mystic_purchases', JSON.stringify(purchases));
     }
     return purchases;
@@ -201,7 +215,6 @@ function openCheckout(signId) {
     document.getElementById('checkout-ebook-title').textContent = `E-book ${sign.name}: Guia Completo`;
     document.getElementById('checkout-ebook-price').textContent = sign.price || 'R$ 37,00';
 
-    // WhatsApp Checkout Link
     const user = JSON.parse(localStorage.getItem('mystic_user') || '{}');
     const msg = encodeURIComponent(`Olá! Gostaria de comprar o E-book do signo de ${sign.name} por R$ 37,00. Meu e-mail é ${user.email || 'não informado'}.`);
     document.getElementById('whatsapp-checkout-btn').href = `https://wa.me/5511999999999?text=${msg}`;
@@ -213,9 +226,25 @@ function closeCheckoutModal() {
     document.getElementById('checkout-modal').classList.add('hidden');
 }
 
-function simulatePurchase(method) {
+async function simulatePurchase(method) {
     if (!currentCheckoutSign) return;
     addPurchase(currentCheckoutSign.id);
+
+    // Salvar compra no Supabase se configurado
+    if (supabase) {
+        try {
+            const user = JSON.parse(localStorage.getItem('mystic_user') || '{}');
+            await supabase.from('purchases').insert({
+                user_email: user.email,
+                sign_id: currentCheckoutSign.id,
+                payment_method: method,
+                amount: 37.00
+            });
+        } catch (e) {
+            console.log('Compra registrada apenas localmente');
+        }
+    }
+
     closeCheckoutModal();
     alert(`Pagamento via ${method.toUpperCase()} aprovado com sucesso! O E-book de ${currentCheckoutSign.name} já foi liberado em sua Minha Biblioteca.`);
     switchTab('library');
@@ -246,7 +275,6 @@ function openSignModal(signId) {
     const sign = window.SIGNS_DATA[signId];
     if (!sign) return;
 
-    // Check if user owns it
     const purchases = getPurchases();
     if (!purchases.includes(sign.id)) {
         openCheckout(sign.id);

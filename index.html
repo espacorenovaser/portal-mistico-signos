@@ -39,6 +39,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -82,7 +84,7 @@
             </div>
             <div>
                 <h2 class="text-2xl font-bold font-heading text-white">Área do Cliente & Loja</h2>
-                <p class="text-slate-400 text-xs mt-1">Identifique-se para acessar seus e-books comprados</p>
+                <p class="text-slate-400 text-xs mt-1">Conectado via Supabase Cloud (ou modo local)</p>
             </div>
 
             <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
@@ -95,7 +97,7 @@
                     <input type="email" id="login-email" required placeholder="seu@email.com" class="w-full px-4 py-3 rounded-xl bg-mystic-900 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 text-sm">
                 </div>
                 <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:brightness-110 transition-all shadow-lg shadow-orange-500/25 text-sm">
-                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Acessar Minha Conta
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar na Conta
                 </button>
             </form>
             <button onclick="fillDefaultUser()" class="text-xs text-orange-400 hover:underline">Preencher com dados padrão (Claudir)</button>
