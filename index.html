@@ -4,75 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zodíaco & Alma — Loja Oficial de E-books Astrológicos</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        mystic: {
-                            950: '#0a0a0f',
-                            900: '#12121c',
-                            800: '#1c1c2e',
-                            700: '#2a2a40',
-                            600: '#3d3d5c',
-                        },
-                        orange: {
-                            400: '#f6ad55',
-                            500: '#ed8936',
-                            600: '#dd6b20',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        heading: ['Montserrat', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0f;
-            color: #f1f5f9;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Montserrat', sans-serif;
-        }
-        .glass-card {
-            background: rgba(28, 28, 46, 0.65);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .glass-card:hover {
-            border-color: rgba(237, 137, 54, 0.35);
-            box-shadow: 0 10px 30px -10px rgba(237, 137, 54, 0.15);
-        }
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0a0f;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2a2a40;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #3d3d5c;
-        }
-    </style>
+    <!-- Tailwind CSS via Vite / Style -->
+    <link rel="stylesheet" href="/src/style.css">
 </head>
 <body class="min-h-screen bg-mystic-950 text-slate-100 flex flex-col selection:bg-orange-500 selection:text-white">
 
@@ -84,7 +23,7 @@
             </div>
             <div>
                 <h2 class="text-2xl font-bold font-heading text-white">Área do Cliente & Loja</h2>
-                <p class="text-slate-400 text-xs mt-1">Conectado via Supabase Cloud (ou modo local)</p>
+                <p class="text-slate-400 text-xs mt-1">Conectado via Supabase (Variáveis de Ambiente Vercel)</p>
             </div>
 
             <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
@@ -389,9 +328,7 @@
         <p>Todos os direitos reservados.</p>
     </footer>
 
-    <!-- Include store data and app logic -->
-    <script src="signs_data.js"></script>
-    <script src="store_data.js"></script>
-    <script src="app.js"></script>
+    <!-- Main JS Entry Point -->
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html>
